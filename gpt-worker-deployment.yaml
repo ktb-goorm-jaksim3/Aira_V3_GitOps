@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpt-worker
+  namespace: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gpt-worker
+  template:
+    metadata:
+      labels:
+        app: gpt-worker
+    spec:
+      containers:
+      - name: gpt-worker
+        image: 730335258114.dkr.ecr.ap-northeast-2.amazonaws.com/aira/gpt_worker:latest
+        ports:
+        - containerPort: 8080
