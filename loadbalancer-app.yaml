@@ -11,7 +11,7 @@ spec:
     targetRevision: v2.11.0  # 공식 문서 최신 버전
     helm:
       parameters:
-        - name: clusterNam전
+        - name: clusterName
           value: Aira-eks
         - name: region
           value: ap-northeast-2
