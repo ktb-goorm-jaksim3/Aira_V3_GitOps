@@ -16,5 +16,58 @@ spec:
       containers:
       - name: gpt-worker
         image: 730335258114.dkr.ecr.ap-northeast-2.amazonaws.com/aira/gpt_worker:latest
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
         ports:
         - containerPort: 8080
+        env:
+        # 비민감 설정: ConfigMap에서 주입
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AWS_REGION
+        - name: REQUEST_QUEUE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: REQUEST_QUEUE_URL
+        - name: RESPONSE_QUEUE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RESPONSE_QUEUE_URL
+        # 민감 정보: Secret에서 주입
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: OPENAI_API_KEY
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpt-worker
+  namespace: application
+spec:
+  selector:
+    app: gpt-worker
+  ports:
+  - protocol: TCP
+    port: 9000
+    targetPort: 9000

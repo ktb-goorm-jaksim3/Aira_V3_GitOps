@@ -1,0 +1,75 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: application
+data:
+  # 프론트엔드 설정
+  VUE_APP_API_BASE_URL: "https://kopmorning.com"
+  
+  # 백엔드의 비민감 설정
+  MYSQL_DATABASE: "Aira"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  GPT_WORKER_URL: "http://gpt-worker:9000/generate/"
+  
+  # GPT Worker의 비민감 설정
+  AWS_REGION: "ap-northeast-2"
+  REQUEST_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/730335258114/gpt-request-queue.fifo"
+  RESPONSE_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/730335258114/gpt-response-queue.fifo"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: application
+data:
+  nginx.conf: |-
+    worker_processes  1;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       mime.types;
+        default_type  application/octet-stream;
+        sendfile        on;
+        keepalive_timeout  65;
+
+        server {
+            listen       80;
+            server_name  localhost;
+
+            # Mixed Content 오류 해결을 위한 CSP 설정
+            add_header Content-Security-Policy "upgrade-insecure-requests";
+
+            # Serve static assets
+            root   /usr/share/nginx/html;
+            index  index.html;
+
+            # Nginx 상태 정보 (Prometheus-Nginx Exporter에서 읽어감)
+            location /nginx_status {
+                stub_status;
+                allow all;  # 내부 네트워크에서 접근 가능하게 변경
+            }
+
+            # Reverse proxy block for backend API requests (for example, authentication endpoints)
+            location ~ ^/(auth|generate|health|load|questions)/ {
+                proxy_pass http://backend:8000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # Fallback for single-page applications
+            location / {
+                try_files $uri $uri/ /index.html;
+            }
+        }
+    }

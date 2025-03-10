@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: infrastructure
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: v2.11.0  # 공식 문서 최신 버전
+    helm:
+      parameters:
+        - name: clusterNam전
+          value: Aira-eks
+        - name: region
+          value: ap-northeast-2
+        - name: vpcId
+          value: vpc-0987d9bb0b8efb784
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infrastructure
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

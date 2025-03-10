@@ -16,5 +16,39 @@ spec:
       containers:
       - name: frontend
         image: 730335258114.dkr.ecr.ap-northeast-2.amazonaws.com/aira/frontend:latest
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
         ports:
         - containerPort: 80
+        env:
+        - name: VUE_APP_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: VUE_APP_API_BASE_URL
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: application
+spec:
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

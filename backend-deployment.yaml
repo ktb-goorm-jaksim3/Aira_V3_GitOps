@@ -16,5 +16,58 @@ spec:
       containers:
       - name: backend
         image: 730335258114.dkr.ecr.ap-northeast-2.amazonaws.com/aira/backend:latest
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
         ports:
         - containerPort: 8080
+        env:
+        # 비민감 설정: ConfigMap에서 주입
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: MYSQL_DATABASE
+        - name: ALGORITHM
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: ALGORITHM
+        - name: ACCESS_TOKEN_EXPIRE_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: ACCESS_TOKEN_EXPIRE_MINUTES
+        - name: GPT_WORKER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: GPT_WORKER_URL
+        # 민감 정보: Secret에서 주입
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_ROOT_PASSWORD
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: application
+spec:
+  selector:
+    app: backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
