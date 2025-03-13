@@ -35,31 +35,38 @@ data:
     http {
         include       mime.types;
         default_type  application/octet-stream;
-        sendfile        on;
+        sendfile      on;
         keepalive_timeout  65;
 
         server {
             listen       80;
-            server_name  localhost;
+            server_name  $host;
 
-            # 추가된 응답 헤더
-            add_header X-Content-Type-Options "nosniff";
-            add_header Cache-Control "public, max-age=3600";
+            # 응답 헤더 (항상 적용)
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Cache-Control "public, max-age=3600" always;
 
-            # Mixed Content 오류 해결을 위한 CSP 설정
-            add_header Content-Security-Policy "upgrade-insecure-requests";
+            # CSP 설정: upgrade-insecure-requests
+            add_header Content-Security-Policy "upgrade-insecure-requests" always;
 
-            # Serve static assets
+            # 정적 파일 제공 (root 경로에 실제 파일들이 존재하는지 확인)
             root   /usr/share/nginx/html;
             index  index.html;
 
-            # Nginx 상태 정보 (Prometheus-Nginx Exporter에서 읽어감)
-            location /nginx_status {
-                stub_status;
-                allow all;  # 내부 네트워크에서 접근 가능하게 변경
+            # favicon 요청에 대한 간단한 처리 (파일이 없으면 빈 204 응답)
+            location = /favicon.ico {
+                empty_gif;
+                access_log off;
+                log_not_found off;
             }
 
-            # Reverse proxy block for backend API requests (for example, authentication endpoints)
+            # Nginx 상태 정보 (내부 모니터링)
+            location /nginx_status {
+                stub_status;
+                allow all;
+            }
+
+            # Reverse proxy: 백엔드 API 요청 프록시
             location ~ ^/(auth|generate|health|load|questions)/ {
                 proxy_pass http://backend:8000;
                 proxy_http_version 1.1;
@@ -71,7 +78,7 @@ data:
                 proxy_set_header X-Forwarded-Proto $scheme;
             }
 
-            # Fallback for single-page applications
+            # 기타 모든 요청: SPA fallback
             location / {
                 try_files $uri $uri/ /index.html;
             }
