@@ -64,9 +64,6 @@ kind: Service
 metadata:
   name: backend
   namespace: application
-  annotations:
-    #Instance Mode로 대상 그룹에 등록. Pod 기반의 오토스케일링. HPA로 Pod 수가 변경될 때마다 대상 그룹이 자동으로 업데이트
-    service.beta.kubernetes.io/aws-load-balancer-target-type: ip  
 spec:
   type: LoadBalancer
   selector:

@@ -47,7 +47,8 @@ metadata:
   namespace: application
   annotations:
     #Instance Mode로 대상 그룹에 등록. Pod 기반의 오토스케일링. HPA로 Pod 수가 변경될 때마다 대상 그룹이 자동으로 업데이트
-    service.beta.kubernetes.io/aws-load-balancer-target-type: ip   
+    #로드밸런서는 NLB까지 서비스에서 지원, ALB는 컨트롤러 필요
+    service.beta.kubernetes.io/aws-load-balancer-target-type: "nlb"
 spec:
   type: LoadBalancer
   selector:
