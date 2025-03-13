@@ -4,16 +4,7 @@ kind: Ingress
 metadata:
   name: application-ingress
   namespace: application
-  annotations:
-    kubernetes.io/ingress.class: "alb"
-    alb.ingress.kubernetes.io/scheme: "internet-facing"
-    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:730335258114:certificate/251212de-b216-4557-837c-74e8db906759"
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
 spec:
-  tls:
-    - hosts:
-        - kopmorning.com
-      secretName: tls-kopmorning-com  # 일반적으로 dummy secret; ALB는 ACM 인증서를 사용
   rules:
     - host: kopmorning.com
       http:

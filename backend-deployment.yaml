@@ -64,10 +64,36 @@ kind: Service
 metadata:
   name: backend
   namespace: application
+  annotations:
+    #Instance Mode로 대상 그룹에 등록. Pod 기반의 오토스케일링. HPA로 Pod 수가 변경될 때마다 대상 그룹이 자동으로 업데이트
+    service.beta.kubernetes.io/aws-load-balancer-target-type: ip  
 spec:
+  type: LoadBalancer
   selector:
     app: backend
   ports:
-  - protocol: TCP
+  - name: http
+    protocol: TCP
     port: 8000
     targetPort: 8000
+---
+#Horizontal Pod Autoscaler. CPU, 메모리 등 메트릭 기반 스케일 인/아웃
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: application
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
