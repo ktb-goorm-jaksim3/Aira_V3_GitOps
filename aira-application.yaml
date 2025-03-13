@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guestbook
+  name: aira
   namespace: argocd
 spec:
   project: default
@@ -18,4 +18,4 @@ spec:
       selfHeal: true
     syncOptions:
       # 만약 Namespace가 미리 안만들어져 있을 경우
-      - CreateNamespace=tru우
+      - CreateNamespace=true
