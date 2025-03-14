@@ -65,7 +65,8 @@ metadata:
   name: backend
   namespace: application
 spec:
-  type: LoadBalancer
+  #로드밸런싱은 kube-proxy로 실행
+  type: ClusterIP
   selector:
     app: backend
   ports:

@@ -16,8 +16,8 @@ data:
   
   # GPT Worker의 비민감 설정
   AWS_REGION: "ap-northeast-2"
-  REQUEST_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/730335258114/gpt-request-queue.fifo"
-  RESPONSE_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/730335258114/gpt-response-queue.fifo"
+  REQUEST_QUEUE_URL: "https://sqs.ap-northeast-3.amazonaws.com/730335258114/Aira-cluster-gpt-request-queue.fifo"
+  RESPONSE_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/730335258114/Aira-cluster-gpt-response-queue.fifo"
 ---
 apiVersion: v1
 kind: ConfigMap

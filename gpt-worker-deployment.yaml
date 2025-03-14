@@ -55,7 +55,8 @@ metadata:
   name: gpt-worker
   namespace: application
 spec:
-  type: LoadBalancer
+  #로드밸런싱은 kube-proxy로 실행
+  type: ClusterIP
   selector:
     app: gpt-worker
   ports:
